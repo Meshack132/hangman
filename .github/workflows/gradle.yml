@@ -26,13 +26,25 @@ jobs:
     - name: Cache Gradle Dependencies
       uses: actions/cache@v3
       with:
-        path: ~/.gradle/caches
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
 
+    - name: Validate Gradle Wrapper
+      run: ./gradlew wrapper --gradle-version
+
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew build --info
 
     - name: Run Tests
-      run: ./gradlew test
+      run: ./gradlew test --info
+
+    - name: Upload Test Results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: build/reports/tests/test
